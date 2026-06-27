@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { signUp, signInGoogle } from '@/lib/auth-client';
@@ -11,30 +10,23 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 const RegisterPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
   const onSubmit = async (formData) => {
-    await signUp.email(
-      {
-        email: formData.email,
-        password: formData.password,
-        name: formData.fullName,
-        role: formData.role,
+    await signUp.email({
+      email: formData.email,
+      password: formData.password,
+      name: formData.fullName,
+      image: "", 
+    }, {
+      onSuccess: () => {
+        toast.success("Registration successful!");
+        router.push("/");
       },
-      {
-        onSuccess: () => {
-          toast.success("Registration successful!");
-          router.push("/");
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message || "Registration failed!");
-        },
-      }
-    );
+      onError: (ctx) => {
+        toast.error(ctx.error.message || "Registration failed!");
+      },
+    });
   };
 
   const handleGoogleLogin = async () => {
@@ -53,48 +45,56 @@ const RegisterPage = () => {
             <label className="label"><span className="label-text font-semibold text-green-800">Full Name</span></label>
             <input 
               {...register("fullName", { required: "Full name is required" })}
-              type="text" 
-              placeholder="Your Name"
-              className="input input-bordered w-full bg-green-50 border-green-200 focus:border-green-600 text-green-950 placeholder:text-gray-400 outline-none" 
+              type="text" placeholder="Your Name"
+              className="input input-bordered w-full bg-green-50 border-green-200 focus:border-green-600 outline-none" 
             />
+            {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>}
           </div>
 
           <div className="form-control">
             <label className="label"><span className="label-text font-semibold text-green-800">Email</span></label>
             <input 
-              {...register("email", { required: "Email is required" })}
-              type="email" 
-              placeholder="example@mail.com"
-              className="input input-bordered w-full bg-green-50 border-green-200 focus:border-green-600 text-green-950 placeholder:text-gray-400 outline-none" 
+              {...register("email", { 
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: "Invalid email address"
+                }
+              })}
+              type="email" placeholder="example@mail.com"
+              className="input input-bordered w-full bg-green-50 border-green-200 focus:border-green-600 outline-none" 
             />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
 
-          {/* Password Field */}
           <div className="form-control relative">
             <label className="label"><span className="label-text font-semibold text-green-800">Password</span></label>
             <div className="relative flex items-center">
               <input 
-                {...register("password", { required: "Password is required" })}
+                {...register("password", { 
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters long"
+                  },
+                  pattern: {
+                    value: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/,
+                    message: "Password must contain at least one letter and one number"
+                  }
+                })}
                 type={showPassword ? "text" : "password"} 
                 placeholder="••••••••"
-                className="input input-bordered w-full bg-green-50 border-green-200 focus:border-green-600 text-green-950 placeholder:text-gray-400 outline-none pr-12" 
+                className="input input-bordered w-full bg-green-50 border-green-200 focus:border-green-600 outline-none pr-12" 
               />
               <button 
                 type="button"
-                className="absolute right-4 flex items-center justify-center text-green-600 hover:text-green-800"
+                className="absolute right-4 text-green-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
               </button>
             </div>
-          </div>
-
-          <div className="form-control">
-            <label className="label"><span className="label-text font-semibold text-green-800">I am a...</span></label>
-            <select {...register("role", { required: true })} className="select select-bordered w-full bg-green-50 border-green-200 focus:border-green-600 text-green-950 outline-none">
-              <option value="reader">Reader</option>
-              <option value="writer">Writer</option>
-            </select>
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
           </div>
 
           <button type="submit" className="btn bg-green-600 hover:bg-green-700 text-white w-full mt-4 border-none">
@@ -104,7 +104,7 @@ const RegisterPage = () => {
 
         <div className="divider text-green-400 my-6">OR</div>
         
-        <button onClick={handleGoogleLogin} className="btn btn-outline w-full border-green-300 text-green-800 hover:bg-green-600 hover:text-white hover:border-green-600">
+        <button onClick={handleGoogleLogin} className="btn btn-outline w-full border-green-300 text-green-800 hover:bg-green-600 hover:text-white">
           Continue with Google
         </button>
       </div>

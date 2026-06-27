@@ -1,6 +1,3 @@
-import dns from "node:dns";
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
-
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -18,38 +15,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: {
-    default: "BookVerse | Discover & Read Original Ebooks",
-    template: "%s | BookVerse",
-  },
-  description: "Join BookVerse to discover, read, and share original ebooks from talented writers worldwide. Created by Saima Akter.",
-  keywords: ["ebooks", "original literature", "reading platform", "writers", "digital library"],
-  authors: [{ name: "Saima Akter" }],
-  creator: "Saima Akter",
-  openGraph: {
-    title: "BookVerse | Discover & Read Original Ebooks",
-    description: "Connect with writers and readers on the ultimate ebook sharing platform by Saima Akter.",
-    url: "https://bookverse.vercel.app",
-    siteName: "BookVerse",
-    type: "website",
-  },
+  title: "BookVerse | Discover & Read Original Ebooks",
+  description: "Join BookVerse to discover, read, and share original ebooks.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      // data-theme="light"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-white text-gray-900">
+        
         <Navbar />
         <main className="flex-grow">{children}</main>
-        <Footer></Footer>
-        <Toaster
-  position="top-center"
-  reverseOrder={false}
-/>
+        <Footer />
+        <Toaster position="top-center" reverseOrder={false} />
       </body>
     </html>
   );
