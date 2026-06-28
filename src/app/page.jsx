@@ -23,7 +23,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="bg-white min-h-screen text-slate-800 overflow-x-hidden">
+    <main className="bg-base-100 min-h-screen text-base-content overflow-x-hidden transition-colors duration-300">
       <Hero />
       <EbookGenres />
       <FeaturedEbooks books={books} loading={loading} />

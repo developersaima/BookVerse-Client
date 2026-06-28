@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { motion } from "framer-motion";
 import { FiBook, FiSearch, FiHeart, FiLayers, FiEye, FiActivity } from "react-icons/fi";
 
@@ -26,9 +27,11 @@ export default function EbookGenres() {
   ];
 
   return (
-    <section className="py-16 px-6 max-w-7xl mx-auto border-t border-slate-50">
+    <section className="py-16 px-6 max-w-7xl mx-auto border-t border-base-content/5 transition-colors duration-300">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-extrabold text-slate-950">Ebook <span className="text-[#00a851]">Genres</span></h2>
+        <h2 className="text-3xl font-extrabold text-base-content">
+          Ebook <span className="text-[#00a851]">Genres</span>
+        </h2>
         <div className="w-10 h-1 bg-[#00a851] mx-auto mt-3 rounded-full"></div>
       </div>
 
@@ -47,10 +50,12 @@ export default function EbookGenres() {
               href={`/browse?category=${genre.slug}`}
               variants={fadeIn}
               whileHover={{ scale: 1.05, y: -4 }}
-              className="flex flex-col items-center justify-center p-6 border border-slate-100 bg-slate-50/50 rounded-2xl text-center group hover:border-[#00a851]/20 hover:bg-white hover:shadow-xl hover:shadow-slate-100/60 transition-all duration-300"
+              className="flex flex-col items-center justify-center p-6 border border-base-content/10 bg-base-200/40 rounded-2xl text-center group hover:border-[#00a851]/30 hover:bg-base-100 hover:shadow-xl transition-all duration-300"
             >
-              <IconComponent className="text-2xl mb-3 text-slate-400 group-hover:text-[#00a851] group-hover:scale-110 transition-all duration-300" />
-              <span className="text-sm font-bold text-slate-700 group-hover:text-[#00a851] transition-colors">{genre.name}</span>
+              <IconComponent className="text-2xl mb-3 text-base-content/40 group-hover:text-[#00a851] group-hover:scale-110 transition-all duration-300" />
+              <span className="text-sm font-bold text-base-content/80 group-hover:text-[#00a851] transition-colors">
+                {genre.name}
+              </span>
             </motion.a>
           );
         })}
