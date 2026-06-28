@@ -26,7 +26,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative min-h-[70vh] flex items-center justify-center bg-green-50 px-4">
+    <section className="relative min-h-[90vh] flex items-center justify-center bg-green-50 px-4 py-20">
       <Swiper
         spaceBetween={30}
         centeredSlides={true}
