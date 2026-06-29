@@ -6,8 +6,9 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { signIn, signInGoogle } from '@/lib/auth-client';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUserShield } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
+import { LuBookOpenText } from "react-icons/lu";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -15,8 +16,13 @@ const LoginPage = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm();
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const onSubmit = async (formData) => {
     await signIn.email(
@@ -41,67 +47,144 @@ const LoginPage = () => {
     router.push("/");
   };
 
+  // Admin credentials for testing
+  const fillAdminCredentials = () => {
+    document.querySelector('input[name="email"]').value = "admin@bookverse.com";
+    document.querySelector('input[name="password"]').value = "admin001";
+    // Trigger change events
+    const event = new Event('input', { bubbles: true });
+    document.querySelector('input[name="email"]').dispatchEvent(event);
+    document.querySelector('input[name="password"]').dispatchEvent(event);
+    toast.success("Admin credentials filled!");
+  };
+
   return (
-    <div className="min-h-screen bg-green-500 dark:bg-base-100 flex justify-center items-center px-4 py-12">
-      <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-xl border border-green-100">
-        <h2 className="text-3xl font-bold text-center mb-2 text-green-900">Login</h2>
-        <p className="text-center text-green-700 mb-8">Welcome back to BookVerse</p>
+    <div className="min-h-screen bg-base-200 flex justify-center items-center px-4 py-12">
+      <div className="w-full max-w-md p-8 bg-base-100 rounded-2xl shadow-xl border border-base-200">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <LuBookOpenText className="text-emerald-500 text-4xl" />
+            <span className="text-3xl font-black tracking-tight text-base-content">
+              Book<span className="text-emerald-500">Verse</span>
+            </span>
+          </div>
+          <h2 className="text-2xl font-bold text-base-content">Welcome Back</h2>
+          <p className="text-sm text-base-content/60 mt-1">Sign in to continue your reading journey</p>
+        </div>
+
+        <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 rounded-xl p-3 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FaUserShield className="text-emerald-600 dark:text-emerald-400" />
+            <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">Admin Demo:</span>
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono">admin@bookverse.com</span>
+          </div>
+          <button
+            type="button"
+            onClick={fillAdminCredentials}
+            className="btn btn-xs btn-success text-white"
+          >
+            Fill
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div className="form-control">
             <label className="label">
-              <span className="label-text font-semibold text-green-800">Email Address</span>
+              <span className="label-text font-medium text-base-content flex items-center gap-2">
+                <FaEnvelope className="text-emerald-500" /> Email Address <span className="text-error">*</span>
+              </span>
             </label>
             <input
-              {...register("email", { required: "Email is required" })}
+              {...register("email", { 
+                required: "Email is required",
+                pattern: {
+                  value: /^\S+@\S+\.\S+$/,
+                  message: "Invalid email address",
+                },
+              })}
               type="email"
+              name="email"
               placeholder="example@mail.com"
-              className="input input-bordered w-full bg-green-50/50 border-green-200 focus:border-green-600 focus:ring-1 focus:ring-green-600 outline-none transition-all duration-200"
+              className="input input-bordered w-full bg-base-200 text-base-content border-base-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all duration-200"
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+            {errors.email && (
+              <p className="text-error text-xs mt-1">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="form-control">
             <label className="label">
-              <span className="label-text font-semibold text-green-800">Password</span>
+              <span className="label-text font-medium text-base-content flex items-center gap-2">
+                <FaLock className="text-emerald-500" /> Password <span className="text-error">*</span>
+              </span>
             </label>
             <div className="relative flex items-center">
               <input
-                {...register("password", { required: "Password is required" })}
+                {...register("password", { 
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  },
+                })}
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="input input-bordered w-full bg-green-50/50 border-green-200 focus:border-green-600 focus:ring-1 focus:ring-green-600 outline-none pr-12 transition-all duration-200"
+                className="input input-bordered w-full bg-base-200 text-base-content border-base-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none pr-12 transition-all duration-200"
               />
               <button
                 type="button"
-                className="absolute right-4 text-green-600 hover:text-green-700"
+                className="absolute right-4 text-base-content/40 hover:text-emerald-500 transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
               </button>
             </div>
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message }</p>}
+            {errors.password && (
+              <p className="text-error text-xs mt-1">{errors.password.message}</p>
+            )}
           </div>
 
-          <button type="submit" className="btn bg-green-600 hover:bg-green-700 text-white w-full border-none shadow-md mt-6 font-semibold transition-all duration-200">
-            Login
+          <div className="flex items-center justify-between">
+            <label className="label cursor-pointer gap-2">
+              <input type="checkbox" className="checkbox checkbox-success checkbox-sm" />
+              <span className="label-text text-sm text-base-content/70">Remember me</span>
+            </label>
+            <Link href="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline font-medium transition-colors">
+              Forgot Password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-success text-white w-full border-none shadow-lg hover:shadow-emerald-500/20 transition-all duration-200 font-semibold"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <span className="loading loading-spinner loading-sm mr-2"></span>
+                Signing In...
+              </>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
 
-        <div className="divider text-green-400 my-6 text-sm font-medium">OR</div>
-        
+        <div className="divider text-base-content/40 my-6 text-sm font-medium">OR</div>
+
         <button
           onClick={handleGoogleLogin}
-          className="btn btn-outline w-full border-green-300 text-green-800 hover:bg-green-600 hover:text-white hover:border-green-600 flex items-center justify-center gap-3 font-semibold transition-all duration-200"
+          className="btn btn-outline w-full border-base-300 text-base-content hover:bg-emerald-600 hover:text-white hover:border-emerald-600 flex items-center justify-center gap-3 font-medium transition-all duration-200"
         >
-          <FcGoogle size={22} className="group-hover:scale-110 transition-transform duration-200" />
-          Login with Google
+          <FcGoogle size={22} />
+          Continue with Google
         </button>
 
-        <p className="text-sm text-center mt-6 text-green-800">
+        <p className="text-sm text-center mt-6 text-base-content/70">
           Don't have an account?{" "}
-          <Link href="/register" className="text-green-600 font-bold hover:text-green-700 hover:underline ml-1">
-            Register here
+          <Link href="/register" className="text-emerald-600 font-bold hover:text-emerald-700 hover:underline ml-1 transition-colors">
+            Create one now
           </Link>
         </p>
       </div>
