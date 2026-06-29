@@ -164,15 +164,7 @@ const Navbar = () => {
                       Dashboard
                     </Link>
                   </li>
-                  <li>
-                    <Link 
-                      href="/dashboard/profile" 
-                      className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-base-200/60 hover:text-[#00a851] transition-colors"
-                    >
-                      Profile Settings
-                    </Link>
-                  </li>
-                  
+                 
                   <div className="my-1 border-t border-base-content/5" />
                   
                   <li>
@@ -206,17 +198,17 @@ const Navbar = () => {
       </div>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-[100] lg:hidden">
+        <div className="fixed inset-0 z-[100] min-h-screen lg:hidden">
           <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileOpen(false)}
           />
           
-          <div className="absolute left-0 top-0 h-full w-72 bg-base-100 p-5 shadow-2xl flex flex-col z-10 border-r border-base-content/5 animate-in slide-in-from-left duration-300">
-            <div className="flex justify-between items-center mb-6 pb-3 border-b border-base-content/5">
-              <h2 className="font-black text-base-content text-base uppercase tracking-wider">Navigation</h2>
+          <div className="absolute left-0 top-0 h-full w-72 bg-base-100 shadow-2xl flex flex-col z-10 border-r border-base-content/10 animate-in slide-in-from-left duration-300">
+            <div className="flex justify-between items-center p-4 border-b border-base-content/10 bg-base-100">
+              <h2 className="font-black text-base-content text-base uppercase tracking-wider">Menu</h2>
               <button 
-                className="btn btn-sm btn-circle btn-ghost text-base-content/60" 
+                className="btn btn-sm btn-circle btn-ghost text-base-content/60 hover:bg-base-200" 
                 onClick={() => setMobileOpen(false)}
               >
                 ✕
@@ -224,8 +216,8 @@ const Navbar = () => {
             </div>
 
             {user && (
-              <div className="flex items-center gap-3 px-2 py-3 bg-base-200/40 rounded-2xl mb-4 border border-base-content/5">
-                <div className="w-10 h-10 rounded-full bg-base-300 overflow-hidden relative flex items-center justify-center border border-base-content/10">
+              <div className="flex items-center gap-3 px-4 py-3 bg-base-200/50 border-b border-base-content/10">
+                <div className="w-10 h-10 rounded-full bg-base-300 overflow-hidden relative flex items-center justify-center border border-base-content/10 flex-shrink-0">
                   {user?.image ? (
                     <Image src={user.image} alt="user" fill className="object-cover" />
                   ) : (
@@ -234,47 +226,61 @@ const Navbar = () => {
                     </span>
                   )}
                 </div>
-                <div className="truncate max-w-[170px]">
-                  <p className="text-xs font-bold text-base-content truncate">{user?.name}</p>
-                  <span className="inline-block px-1.5 py-0.5 text-[8px] font-extrabold tracking-wider text-[#00a851] bg-[#00a851]/10 rounded-md uppercase mt-0.5">
+                <div className="truncate">
+                  <p className="text-sm font-bold text-base-content truncate">{user?.name}</p>
+                  <span className="inline-block px-2 py-0.5 text-[8px] font-extrabold tracking-wider text-[#00a851] bg-[#00a851]/10 rounded-md uppercase mt-0.5">
                     {user?.role || "Member"}
                   </span>
                 </div>
               </div>
             )}
 
-            <ul className="menu menu-vertical p-0 gap-1 text-sm font-bold tracking-wide text-base-content/70">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className={
-                      isActive(link.href)
-                        ? "bg-[#00a851] text-white rounded-xl py-2.5 px-4"
-                        : "hover:text-[#00a851] hover:bg-base-200/60 rounded-xl py-2.5 px-4 transition-all"
-                    }
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-
-              {user && (
-                <>
-                  <div className="my-2 border-t border-base-content/5" />
-                  <li>
-                    <Link href="/dashboard/profile" className="hover:text-[#00a851] hover:bg-base-200/60 rounded-xl py-2.5 px-4 transition-all">
-                      Profile Settings
+            <div className="flex-1 overflow-y-auto p-4 bg-base-100">
+              <ul className="space-y-1 text-sm font-bold tracking-wide text-base-content/70">
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={
+                        isActive(link.href)
+                          ? "flex items-center gap-3 px-4 py-3 bg-[#00a851] text-white rounded-xl"
+                          : "flex items-center gap-3 px-4 py-3 hover:text-[#00a851] hover:bg-base-200/60 rounded-xl transition-all"
+                      }
+                    >
+                      {link.name}
                     </Link>
                   </li>
-                  <li>
-                    <button onClick={handleLogout} className="text-error hover:bg-error/10 rounded-xl py-2.5 px-4 transition-all mt-2">
-                      Logout
-                    </button>
-                  </li>
-                </>
-              )}
-            </ul>
+                ))}
+
+                {user && (
+                  <>
+                    <div className="my-3 border-t border-base-content/10" />
+                    <li>
+                      <button 
+                        onClick={handleLogout} 
+                        className="flex w-full items-center gap-3 px-4 py-3 text-error hover:bg-error/10 rounded-xl transition-all"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
+
+            <div className="p-4 border-t border-base-content/10 bg-base-100">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-base-content/40">© 2026 BookVerse</span>
+                {mounted && (
+                  <button
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="p-2 rounded-xl border border-base-content/10 bg-base-200/30 hover:bg-base-200 text-base-content/70 hover:text-[#00a851] transition-all"
+                  >
+                    {theme === "dark" ? <FiSun className="w-4 h-4" /> : <FiMoon className="w-4 h-4" />}
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
