@@ -17,16 +17,20 @@ import {
   FaShoppingBag,
   FaCamera,
   FaSpinner,
+  FaTrash,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import { BiHistory } from "react-icons/bi";
 import { authClient } from "@/lib/auth-client";
 
-const API_BASE =  process.env.NEXT_PUBLIC_URL;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ReaderDashboard({ activeTab, user: initialUser }) {
   const [data, setData] = useState({ purchases: [], bookmarks: [] });
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
+  const [bookToRemove, setBookToRemove] = useState(null);
   const [editForm, setEditForm] = useState({
     name: "",
     image: "",
@@ -34,6 +38,7 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
   const [updating, setUpdating] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [user, setUser] = useState(initialUser);
+  const [removingBookmark, setRemovingBookmark] = useState(false);
 
   const getAuthHeaders = async () => {
     try {
@@ -53,18 +58,30 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
     setLoading(true);
     try {
       const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE}/api/user/dashboard`, {
-        headers,
-      });
-      if (res.ok) {
-        const dashboardData = await res.json();
-        setData({
-          purchases: dashboardData.purchases || [],
-          bookmarks: dashboardData.purchasedEbooks || [],
-        });
+      
+      const [dashboardRes, bookmarksRes] = await Promise.all([
+        fetch(`${API_BASE}/api/user/dashboard`, { headers }),
+        fetch(`${API_BASE}/api/bookmarks`, { headers })
+      ]);
+
+      let dashboardData = { purchases: [], purchasedEbooks: [] };
+      let bookmarksData = [];
+
+      if (dashboardRes.ok) {
+        dashboardData = await dashboardRes.json();
       }
+
+      if (bookmarksRes.ok) {
+        bookmarksData = await bookmarksRes.json();
+      }
+
+      setData({
+        purchases: dashboardData.purchases || [],
+        bookmarks: Array.isArray(bookmarksData) ? bookmarksData : (dashboardData.purchasedEbooks || [])
+      });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+      toast.error("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
@@ -79,6 +96,45 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
       });
     }
   }, [user]);
+
+  const handleRemoveBookmark = async () => {
+    if (!bookToRemove) return;
+
+    setRemovingBookmark(true);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API_BASE}/api/bookmarks/toggle`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ebookId: bookToRemove._id }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to remove bookmark");
+      }
+
+      const result = await res.json();
+      toast.success("Bookmark removed successfully!");
+      setIsRemoveModalOpen(false);
+      setBookToRemove(null);
+      await fetchData();
+    } catch (error) {
+      console.error("Remove bookmark error:", error);
+      toast.error(error.message || "Failed to remove bookmark");
+    } finally {
+      setRemovingBookmark(false);
+    }
+  };
+
+  const openRemoveModal = (book) => {
+    setBookToRemove(book);
+    setIsRemoveModalOpen(true);
+  };
+
+  const closeRemoveModal = () => {
+    setIsRemoveModalOpen(false);
+    setBookToRemove(null);
+  };
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -110,54 +166,54 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
     }
   };
 
- const handleEditSubmit = async (e) => {
-  e.preventDefault();
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!editForm.name.trim()) {
-    toast.error("Name is required");
-    return;
-  }
+    if (!editForm.name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
 
-  setUpdating(true);
-  try {
-    const { error } = await authClient.updateUser({
-      name: editForm.name.trim(),
-      image: editForm.image || "",
-    }, {
-      onSuccess: () => {
-        toast.success("Profile updated successfully!");
-        setIsEditModalOpen(false);
+    setUpdating(true);
+    try {
+      const { error } = await authClient.updateUser({
+        name: editForm.name.trim(),
+        image: editForm.image || "",
+      }, {
+        onSuccess: () => {
+          toast.success("Profile updated successfully!");
+          setIsEditModalOpen(false);
+          setUpdating(false);
+          
+          if (user) {
+            setUser({ 
+              ...user, 
+              name: editForm.name.trim(), 
+              image: editForm.image || "" 
+            });
+          }
+          
+          window.location.reload();
+        },
+        onError: (ctx) => {
+          console.error("Update error:", ctx);
+          toast.error(ctx?.error?.message || "Failed to update profile");
+          setUpdating(false);
+        },
+      });
+
+      if (error) {
+        console.error("Update error:", error);
+        toast.error(error.message || "Failed to update profile");
         setUpdating(false);
-        
-        // Update local user state
-        if (user) {
-          setUser({ 
-            ...user, 
-            name: editForm.name.trim(), 
-            image: editForm.image || "" 
-          });
-        }
-        
-        window.location.reload();
-      },
-      onError: (ctx) => {
-        console.error("Update error:", ctx);
-        toast.error(ctx?.error?.message || "Failed to update profile");
-        setUpdating(false);
-      },
-    });
-
-    if (error) {
+      }
+    } catch (error) {
       console.error("Update error:", error);
       toast.error(error.message || "Failed to update profile");
       setUpdating(false);
     }
-  } catch (error) {
-    console.error("Update error:", error);
-    toast.error(error.message || "Failed to update profile");
-    setUpdating(false);
-  }
-};
+  };
+
   const getUserInitials = (name) => {
     if (!name) return "U";
     return name.charAt(0).toUpperCase();
@@ -172,7 +228,8 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
           className="w-full h-full object-cover"
           onError={(e) => {
             e.target.style.display = "none";
-            e.target.parentElement.innerHTML = `<span class="text-4xl font-bold text-white">${getUserInitials(user?.name)}</span>`;
+            const parent = e.target.parentElement;
+            parent.innerHTML = `<span class="text-4xl font-bold text-white">${getUserInitials(user?.name)}</span>`;
           }}
         />
       );
@@ -501,7 +558,7 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
                       </div>
                     )}
                     <div className="absolute top-2 right-2">
-                      <span className="badge badge-primary text-white gap-1">
+                      <span className="badge badge-success text-white gap-1">
                         <FaBookmark className="w-3 h-3" /> Saved
                       </span>
                     </div>
@@ -519,13 +576,19 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
                       </span>
                       <span className="badge badge-ghost text-xs">{book.genre || "N/A"}</span>
                     </div>
-                    <div className="card-actions mt-3">
+                    <div className="card-actions mt-3 flex gap-2">
                       <Link 
                         href={`/ebooks/${book._id}`} 
-                        className="btn btn-outline btn-success btn-sm w-full group-hover:scale-105 transition-transform"
+                        className="btn btn-success text-white btn-sm flex-1 group-hover:scale-105 transition-transform"
                       >
                         <FaBookOpen className="mr-1" /> View Details
                       </Link>
+                      <button
+                        onClick={() => openRemoveModal(book)}
+                        className="btn btn-error btn-sm text-white flex-1 group-hover:scale-105 transition-transform"
+                      >
+                        <FaTrash className="mr-1" /> Remove
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -562,7 +625,8 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.style.display = "none";
-                          e.target.parentElement.innerHTML = getUserInitials(editForm.name || user?.name);
+                          const parent = e.target.parentElement;
+                          parent.innerHTML = getUserInitials(editForm.name || user?.name);
                         }}
                       />
                     ) : (
@@ -645,6 +709,86 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Bookmark Modal */}
+      {isRemoveModalOpen && bookToRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-base-100 rounded-2xl shadow-2xl max-w-md w-full border border-base-200 overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+            <div className="p-6 border-b border-base-200 bg-gradient-to-r from-red-50 to-rose-50">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <FaExclamationTriangle className="text-red-600 text-xl" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-base-content">Remove Bookmark</h3>
+                  <p className="text-sm text-base-content/60">This action cannot be undone</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center gap-4 p-4 bg-base-200/50 rounded-xl">
+                {bookToRemove.coverImage ? (
+                  <img 
+                    src={bookToRemove.coverImage} 
+                    alt={bookToRemove.title} 
+                    className="w-16 h-20 rounded-lg object-cover border border-base-200"
+                    onError={(e) => {
+                      e.target.src = "/placeholder-cover.jpg";
+                    }}
+                  />
+                ) : (
+                  <div className="w-16 h-20 rounded-lg bg-base-200 flex items-center justify-center border border-base-200">
+                    <FaBookOpen className="w-8 h-8 text-base-content/30" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-base-content truncate">
+                    {bookToRemove.title || "Unknown Title"}
+                  </h4>
+                  <p className="text-sm text-base-content/60 truncate">
+                    {bookToRemove.writerName || "Unknown Author"}
+                  </p>
+                  <p className="text-xs text-base-content/40 mt-1">
+                    <span className="font-medium">Price:</span> ${bookToRemove.price?.toFixed(2) || "0.00"}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-sm text-base-content/70 mt-4 text-center">
+                Are you sure you want to remove <span className="font-semibold text-base-content">"{bookToRemove.title}"</span> from your bookmarks?
+              </p>
+            </div>
+
+            <div className="p-6 border-t border-base-200 bg-base-200/30 flex gap-3">
+              <button
+                onClick={closeRemoveModal}
+                className="btn btn-ghost flex-1"
+                disabled={removingBookmark}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemoveBookmark}
+                className="btn btn-error text-white flex-1"
+                disabled={removingBookmark}
+              >
+                {removingBookmark ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" />
+                    Removing...
+                  </>
+                ) : (
+                  <>
+                    <FaTrash className="mr-2" />
+                    Remove Bookmark
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
