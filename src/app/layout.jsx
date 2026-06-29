@@ -32,10 +32,8 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col ">
         <ThemeProvider attribute="data-theme" defaultTheme="light">
-  
-          <Navbar />
           <main className="flex-grow">{children}</main>
-          <Footer />
+
           <Toaster position="top-center" reverseOrder={false} />
         </ThemeProvider>
       </body>

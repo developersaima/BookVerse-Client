@@ -1,19 +1,27 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import { FiBook, FiSearch, FiHeart, FiLayers, FiEye, FiActivity } from "react-icons/fi";
+import {
+  FiBook,
+  FiSearch,
+  FiHeart,
+  FiLayers,
+  FiEye,
+  FiActivity,
+} from "react-icons/fi";
+import Link from "next/link";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.15 }
-  }
+    transition: { staggerChildren: 0.15 },
+  },
 };
 
 export default function EbookGenres() {
@@ -23,7 +31,7 @@ export default function EbookGenres() {
     { name: "Romance", slug: "romance", icon: FiHeart },
     { name: "Sci-Fi", slug: "sci-fi", icon: FiLayers },
     { name: "Fantasy", slug: "fantasy", icon: FiEye },
-    { name: "Horror", slug: "horror", icon: FiActivity }
+    { name: "Horror", slug: "horror", icon: FiActivity },
   ];
 
   return (
@@ -35,7 +43,7 @@ export default function EbookGenres() {
         <div className="w-10 h-1 bg-[#00a851] mx-auto mt-3 rounded-full"></div>
       </div>
 
-      <motion.div 
+      <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
@@ -45,18 +53,21 @@ export default function EbookGenres() {
         {genres.map((genre) => {
           const IconComponent = genre.icon;
           return (
-            <motion.a
+            <motion.div
               key={genre.slug}
-              href={`/browse?category=${genre.slug}`}
               variants={fadeIn}
               whileHover={{ scale: 1.05, y: -4 }}
-              className="flex flex-col items-center justify-center p-6 border border-base-content/10 bg-base-200/40 rounded-2xl text-center group hover:border-[#00a851]/30 hover:bg-base-100 hover:shadow-xl transition-all duration-300"
+             
             >
-              <IconComponent className="text-2xl mb-3 text-base-content/40 group-hover:text-[#00a851] group-hover:scale-110 transition-all duration-300" />
-              <span className="text-sm font-bold text-base-content/80 group-hover:text-[#00a851] transition-colors">
-                {genre.name}
-              </span>
-            </motion.a>
+              <Link href={`/browse?category=${genre.slug}`}
+              
+               className="flex flex-col items-center justify-center p-6 border border-base-content/10 bg-base-200/40 rounded-2xl text-center group hover:border-[#00a851]/30 hover:bg-base-100 hover:shadow-xl transition-all duration-300">
+                <IconComponent className="text-2xl mb-3 text-base-content/40 group-hover:text-[#00a851] group-hover:scale-110 transition-all duration-300" />
+                <span className="text-sm font-bold text-base-content/80 group-hover:text-[#00a851] transition-colors">
+                  {genre.name}
+                </span>
+              </Link>
+            </motion.div>
           );
         })}
       </motion.div>
