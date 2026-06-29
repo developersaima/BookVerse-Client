@@ -31,6 +31,7 @@ export const auth = betterAuth({
     },
   },
   socialProviders: {
+    
     google: {
       ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
         ? {

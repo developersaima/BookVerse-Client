@@ -50,7 +50,7 @@ const LoginPage = () => {
   // Admin credentials for testing
   const fillAdminCredentials = () => {
     document.querySelector('input[name="email"]').value = "admin@bookverse.com";
-    document.querySelector('input[name="password"]').value = "admin001";
+    document.querySelector('input[name="password"]').value = "Admin001";
     // Trigger change events
     const event = new Event('input', { bubbles: true });
     document.querySelector('input[name="email"]').dispatchEvent(event);
@@ -62,17 +62,17 @@ const LoginPage = () => {
     <div className="min-h-screen bg-base-200 flex justify-center items-center px-4 py-12">
       <div className="w-full max-w-md p-8 bg-base-100 rounded-2xl shadow-xl border border-base-200">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
+          {/* <div className="flex items-center justify-center gap-2 mb-3">
             <LuBookOpenText className="text-emerald-500 text-4xl" />
             <span className="text-3xl font-black tracking-tight text-base-content">
               Book<span className="text-emerald-500">Verse</span>
             </span>
-          </div>
+          </div> */}
           <h2 className="text-2xl font-bold text-base-content">Welcome Back</h2>
-          <p className="text-sm text-base-content/60 mt-1">Sign in to continue your reading journey</p>
+          <p className="text-sm text-base-content/60 mt-1">Sign in to  Book<span className="text-emerald-500 font-medium">Verse</span> continue your reading journey</p>
         </div>
 
-        <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30 rounded-xl p-3 mb-6 flex items-center justify-between">
+        <div className=" border border-emerald-200 dark:border-emerald-800/30 rounded-xl p-3 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FaUserShield className="text-emerald-600 dark:text-emerald-400" />
             <span className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">Admin Demo:</span>
@@ -145,15 +145,7 @@ const LoginPage = () => {
             )}
           </div>
 
-          <div className="flex items-center justify-between">
-            <label className="label cursor-pointer gap-2">
-              <input type="checkbox" className="checkbox checkbox-success checkbox-sm" />
-              <span className="label-text text-sm text-base-content/70">Remember me</span>
-            </label>
-            <Link href="/forgot-password" className="text-sm text-emerald-600 hover:text-emerald-700 hover:underline font-medium transition-colors">
-              Forgot Password?
-            </Link>
-          </div>
+        
 
           <button
             type="submit"

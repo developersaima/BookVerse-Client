@@ -92,14 +92,14 @@ const RegisterPage = () => {
     <div className="min-h-screen bg-base-200 flex justify-center items-center px-4 py-12">
       <div className="w-full max-w-md p-8 bg-base-100 rounded-2xl shadow-xl border border-base-200">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
+          {/* <div className="flex items-center justify-center gap-2 mb-3">
             <LuBookOpenText className="text-emerald-500 text-4xl" />
             <span className="text-3xl font-black tracking-tight text-base-content">
               Book<span className="text-emerald-500">Verse</span>
             </span>
-          </div>
+          </div> */}
           <h2 className="text-2xl font-bold text-base-content">Create Account</h2>
-          <p className="text-sm text-base-content/60 mt-1">Join our community of readers and writers</p>
+          <p className="text-sm text-base-content/60 mt-1">Join  Book<span className="text-emerald-500 font-medium">Verse</span> community of readers and writers</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -194,8 +194,8 @@ const RegisterPage = () => {
               {...register("role")}
               className="select select-bordered w-full bg-base-200 text-base-content border-base-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all duration-200"
             >
-              <option value="reader">📚 Reader</option>
-              <option value="writer">✍️ Writer</option>
+              <option value="reader"> Reader</option>
+              <option value="writer"> Writer</option>
             </select>
           </div>
 
