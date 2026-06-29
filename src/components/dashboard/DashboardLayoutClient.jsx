@@ -127,11 +127,7 @@ export default function DashboardLayoutClient({ children, user }) {
                       {user?.email}
                     </span>
                   </li>
-                  <li>
-                    <Link href="/profile" className="gap-2 text-base-content hover:text-emerald-600">
-                      <FaUser className="text-sm" /> Profile
-                    </Link>
-                  </li>
+                 
                   <div className="divider my-1"></div>
                   <li>
                     <DashboardSignOutButton />

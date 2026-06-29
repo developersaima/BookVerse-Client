@@ -69,16 +69,23 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
 
       if (dashboardRes.ok) {
         dashboardData = await dashboardRes.json();
+        console.log("Dashboard data:", dashboardData);
       }
 
       if (bookmarksRes.ok) {
         bookmarksData = await bookmarksRes.json();
+        console.log("Bookmarks data:", bookmarksData);
       }
 
+      // Fix: Use purchasedEbooks for the ebooks tab
+      const purchasedEbooks = dashboardData.purchasedEbooks || [];
+      
       setData({
         purchases: dashboardData.purchases || [],
         bookmarks: Array.isArray(bookmarksData) ? bookmarksData : (dashboardData.purchasedEbooks || [])
       });
+      
+      console.log("Purchased ebooks:", purchasedEbooks);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       toast.error("Failed to load dashboard data");
@@ -250,6 +257,9 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
     );
   }
 
+  // Get purchased ebooks from purchases array
+  const purchasedEbooks = data.purchases || [];
+
   return (
     <div className="space-y-6">
       {activeTab === "profile" && (
@@ -386,21 +396,7 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
                     <tr key={index} className="hover:bg-base-200/30 transition-colors">
                       <td>
                         <div className="flex items-center gap-3">
-                          {purchase.coverImage ? (
-                            <img 
-                              src={purchase.coverImage} 
-                              alt={purchase.ebookTitle} 
-                              className="w-10 h-14 rounded-lg object-cover border border-base-200"
-                              onError={(e) => {
-                                e.target.style.display = "none";
-                              }}
-                            />
-                          ) : (
-                            <div className="w-10 h-14 rounded-lg bg-base-200 flex items-center justify-center border border-base-200">
-                              <FaBookOpen className="w-5 h-5 text-base-content/30" />
-                            </div>
-                          )}
-                          <span className="font-medium text-base-content">{purchase.ebookTitle || "Unknown"}</span>
+                          <span className="font-medium text-base-content">{purchase.ebookTitle || "Unknown Title"}</span>
                         </div>
                       </td>
                       <td>{purchase.writerName || "Unknown"}</td>
@@ -441,10 +437,10 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
               </h2>
               <p className="text-sm text-base-content/40">All your purchased ebooks in one place</p>
             </div>
-            <span className="badge badge-ghost">{data.purchases?.length || 0} books</span>
+            <span className="badge badge-ghost">{purchasedEbooks.length || 0} books</span>
           </div>
 
-          {data.purchases?.length === 0 ? (
+          {purchasedEbooks.length === 0 ? (
             <div className="bg-base-100 rounded-2xl border border-base-200 shadow-sm p-16 text-center">
               <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-base-200 flex items-center justify-center">
                 <FaBookOpen className="w-12 h-12 text-base-content/30" />
@@ -458,14 +454,14 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {data.purchases.map((book, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {purchasedEbooks.map((book, index) => (
                 <div key={index} className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200 overflow-hidden group">
                   <figure className="relative aspect-[3/4] overflow-hidden bg-base-200">
                     {book.coverImage ? (
                       <img 
                         src={book.coverImage} 
-                        alt={book.ebookTitle} 
+                        alt={book.ebookTitle || book.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           e.target.src = "/placeholder-cover.jpg";
@@ -484,14 +480,14 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
                   </figure>
                   <div className="card-body p-4">
                     <h3 className="card-title text-base font-bold line-clamp-1 text-base-content">
-                      {book.ebookTitle || "Unknown Title"}
+                      {book.ebookTitle || book.title || "Unknown Title"}
                     </h3>
                     <p className="text-sm text-base-content/60 line-clamp-1">
                       {book.writerName || "Unknown Author"}
                     </p>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-lg font-bold text-emerald-600">
-                        ${book.amount?.toFixed(2) || "0.00"}
+                        ${book.amount?.toFixed(2) || book.price?.toFixed(2) || "0.00"}
                       </span>
                       <span className="text-xs text-base-content/40">
                         {book.date ? new Date(book.date).toLocaleDateString() : ""}
@@ -499,7 +495,7 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
                     </div>
                     <div className="card-actions mt-3">
                       <Link 
-                        href={`/ebooks/${book.ebookId}`} 
+                        href={`/ebooks/${book.ebookId || book._id}`} 
                         className="btn btn-success text-white btn-sm w-full group-hover:scale-105 transition-transform"
                       >
                         <FaBookOpen className="mr-1" /> Read Details
@@ -539,7 +535,7 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {data.bookmarks.map((book) => (
                 <div key={book._id} className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200 overflow-hidden group">
                   <figure className="relative aspect-[3/4] overflow-hidden bg-base-200">
@@ -585,7 +581,7 @@ export default function ReaderDashboard({ activeTab, user: initialUser }) {
                       </Link>
                       <button
                         onClick={() => openRemoveModal(book)}
-                        className="btn btn-error btn-sm text-white flex-1 group-hover:scale-105 transition-transform"
+                        className="btn btn-error text-white btn-sm flex-1 group-hover:scale-105 transition-transform"
                       >
                         <FaTrash className="mr-1" /> Remove
                       </button>
